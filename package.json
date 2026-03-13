@@ -1,0 +1,60 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "bunchee",
+    "check-types": "tsc --noEmit",
+    "clean": "rimraf node_modules .turbo dist coverage",
+    "dev": "bun --watch src/index.ts",
+    "format": "prettier --write \"{src,api}/**/*.{js,cjs,mjs,ts,cts,mts}\"",
+    "format:check": "prettier --check \"{src,api}/**/*.{js,cjs,mjs,ts,cts,mts}\"",
+    "lint": "eslint src/ api/ --max-warnings 0",
+    "lint:fix": "eslint --fix src/ api/ --max-warnings 0",
+    "start": "bun dist/index.js",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:coverage:ui": "vitest --coverage --ui",
+    "test:run": "vitest run",
+    "test:run:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "catalog:",
+    "@elysiajs/node": "catalog:",
+    "@elysiajs/openapi": "catalog:",
+    "@portfolio/api-contracts": "workspace:*",
+    "@portfolio/logger": "workspace:*",
+    "elysia": "catalog:"
+  },
+  "devDependencies": {
+    "@portfolio/config-eslint": "workspace:*",
+    "@portfolio/config-typescript": "workspace:*",
+    "@portfolio/vitest-presets": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "bunchee": "catalog:",
+    "eslint": "catalog:",
+    "postcss": "catalog:",
+    "prettier": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {},
+  "optionalDependencies": {}
+}
