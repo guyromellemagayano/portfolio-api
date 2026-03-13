@@ -10,7 +10,7 @@ import type {
 } from "../../contracts/articles.js";
 import type { GatewayPage, GatewayPageDetail } from "../../contracts/pages.js";
 
-export type ContentProviderName = "sanity" | "static";
+export type ContentProviderName = "local" | "static";
 
 export interface ContentProvider {
   readonly name: ContentProviderName;

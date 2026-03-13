@@ -15,10 +15,7 @@ import {
 import { getApiConfig } from "@api/config/env";
 import { API_ENV_KEYS } from "@api/config/env-keys";
 import { createApiLogger } from "@api/config/logger";
-import {
-  createProviderRegistry,
-  SANITY_PROVIDER_MISSING_SERVER_ENV_PRODUCTION_MESSAGE,
-} from "@api/gateway/provider-registry";
+import { createProviderRegistry } from "@api/gateway/provider-registry";
 import { createServer, resolveCorsOrigin } from "@api/server";
 
 describe("API gateway server", () => {
@@ -68,9 +65,6 @@ describe("API gateway server", () => {
       "http://localhost:3000,https://admin.example.com"
     );
     vi.stubEnv(API_ENV_KEYS.API_GATEWAY_CONTENT_PROVIDER, "static");
-    vi.stubEnv(API_ENV_KEYS.SANITY_REQUEST_TIMEOUT_MS, "12000");
-    vi.stubEnv(API_ENV_KEYS.SANITY_REQUEST_MAX_RETRIES, "2");
-    vi.stubEnv(API_ENV_KEYS.SANITY_REQUEST_RETRY_DELAY_MS, "500");
 
     const config = getApiConfig();
 
@@ -80,39 +74,16 @@ describe("API gateway server", () => {
       "https://admin.example.com",
     ]);
     expect(config.integrations.contentProvider).toBe("static");
-    expect(config.integrations.sanity.requestTimeoutMs).toBe(12000);
-    expect(config.integrations.sanity.maxRetries).toBe(2);
-    expect(config.integrations.sanity.retryDelayMs).toBe(500);
   });
 
-  it("allows NEXT_PUBLIC_SANITY_* fallback in non-production environments", () => {
-    vi.stubEnv(API_ENV_KEYS.NODE_ENV, "development");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_PROJECT_ID, "");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_DATASET, "");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_PROJECT_ID, "public-project");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_DATASET, "public-dataset");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_API_VERSION, "2026-01-01");
+  it("uses local content provider by default", () => {
+    vi.stubEnv(API_ENV_KEYS.API_GATEWAY_CONTENT_PROVIDER, "");
 
     const config = getApiConfig();
+    const logger = createApiLogger(config.nodeEnv);
+    const providers = createProviderRegistry(config, logger);
 
-    expect(config.integrations.sanity.projectId).toBe("public-project");
-    expect(config.integrations.sanity.dataset).toBe("public-dataset");
-    expect(config.integrations.sanity.apiVersion).toBe("2026-01-01");
-  });
-
-  it("ignores NEXT_PUBLIC_SANITY_* fallback in production", () => {
-    vi.stubEnv(API_ENV_KEYS.NODE_ENV, "production");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_PROJECT_ID, "");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_DATASET, "");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_PROJECT_ID, "public-project");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_DATASET, "public-dataset");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_API_VERSION, "2026-01-01");
-
-    const config = getApiConfig();
-
-    expect(config.integrations.sanity.projectId).toBeUndefined();
-    expect(config.integrations.sanity.dataset).toBeUndefined();
-    expect(config.integrations.sanity.apiVersion).toBe("2025-02-19");
+    expect(providers.content.name).toBe("local");
   });
 
   it("uses static content provider when explicitly configured", () => {
@@ -125,44 +96,14 @@ describe("API gateway server", () => {
     expect(providers.content.name).toBe("static");
   });
 
-  it("falls back to static provider when sanity config is incomplete", () => {
-    vi.stubEnv(API_ENV_KEYS.API_GATEWAY_CONTENT_PROVIDER, "sanity");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_PROJECT_ID, "");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_DATASET, "");
+  it("falls back to local provider for unknown provider values", () => {
+    vi.stubEnv(API_ENV_KEYS.API_GATEWAY_CONTENT_PROVIDER, "unknown-provider");
 
     const config = getApiConfig();
     const logger = createApiLogger(config.nodeEnv);
     const providers = createProviderRegistry(config, logger);
 
-    expect(providers.content.name).toBe("static");
-  });
-
-  it("uses sanity provider when sanity config is complete", () => {
-    vi.stubEnv(API_ENV_KEYS.API_GATEWAY_CONTENT_PROVIDER, "sanity");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_PROJECT_ID, "demo-project");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_DATASET, "production");
-
-    const config = getApiConfig();
-    const logger = createApiLogger(config.nodeEnv);
-    const providers = createProviderRegistry(config, logger);
-
-    expect(providers.content.name).toBe("sanity");
-  });
-
-  it("fails fast in production when sanity provider is configured without server-side sanity env", () => {
-    vi.stubEnv(API_ENV_KEYS.NODE_ENV, "production");
-    vi.stubEnv(API_ENV_KEYS.API_GATEWAY_CONTENT_PROVIDER, "sanity");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_PROJECT_ID, "");
-    vi.stubEnv(API_ENV_KEYS.SANITY_STUDIO_DATASET, "");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_PROJECT_ID, "public-project");
-    vi.stubEnv(API_ENV_KEYS.NEXT_PUBLIC_SANITY_DATASET, "public-dataset");
-
-    const config = getApiConfig();
-    const logger = createApiLogger(config.nodeEnv);
-
-    expect(() => createProviderRegistry(config, logger)).toThrow(
-      SANITY_PROVIDER_MISSING_SERVER_ENV_PRODUCTION_MESSAGE
-    );
+    expect(providers.content.name).toBe("local");
   });
 
   it("allows CORS in development when allowlist is not configured", () => {

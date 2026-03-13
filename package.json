@@ -38,6 +38,7 @@
     "@elysiajs/node": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@portfolio/api-contracts": "workspace:*",
+    "@portfolio/content-data": "workspace:*",
     "@portfolio/logger": "workspace:*",
     "elysia": "catalog:"
   },

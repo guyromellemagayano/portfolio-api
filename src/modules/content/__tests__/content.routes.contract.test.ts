@@ -113,7 +113,7 @@ describe("GET /v1/content/articles contract", () => {
   it("returns the standard error envelope when the route propagates a provider error", async () => {
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getArticles: vi.fn().mockRejectedValue(
           new GatewayError({
             statusCode: 502,
@@ -183,7 +183,7 @@ describe("GET /v1/content/articles/:slug contract", () => {
   it("returns the standard success envelope for article detail", async () => {
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getArticleBySlug: vi.fn().mockResolvedValue({
           id: "article-1",
           title: "Example Article",
@@ -246,7 +246,7 @@ describe("GET /v1/content/articles/:slug contract", () => {
       },
       meta: {
         correlationId: "corr-test-article-detail-success",
-        provider: "sanity",
+        provider: "local",
         slug: "example-article",
         module: "content",
         resource: "article",
@@ -257,7 +257,7 @@ describe("GET /v1/content/articles/:slug contract", () => {
   it("returns the standard error envelope for a missing article", async () => {
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getArticleBySlug: vi.fn().mockResolvedValue(null),
       })
     );
@@ -305,7 +305,7 @@ describe("GET /v1/content/articles/:slug contract", () => {
     const slug = "some-slug";
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getArticleBySlug: vi.fn().mockRejectedValue(
           new GatewayError({
             statusCode: 502,
@@ -368,7 +368,7 @@ describe("GET /v1/content/pages contract", () => {
   it("returns the standard success envelope with page list metadata", async () => {
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getPages: vi.fn().mockResolvedValue([
           {
             id: "page-1",
@@ -423,7 +423,7 @@ describe("GET /v1/content/pages contract", () => {
       ],
       meta: {
         correlationId: "corr-test-pages-success",
-        provider: "sanity",
+        provider: "local",
         count: 1,
         module: "content",
         resource: "page",
@@ -444,7 +444,7 @@ describe("GET /v1/content/pages/:slug contract", () => {
   it("returns the standard success envelope for page detail", async () => {
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getPageBySlug: vi.fn().mockResolvedValue({
           id: "page-1",
           slug: "now",
@@ -526,7 +526,7 @@ describe("GET /v1/content/pages/:slug contract", () => {
       },
       meta: {
         correlationId: "corr-test-page-detail-success",
-        provider: "sanity",
+        provider: "local",
         slug: "now",
         module: "content",
         resource: "page",
@@ -537,7 +537,7 @@ describe("GET /v1/content/pages/:slug contract", () => {
   it("returns the standard error envelope for a missing page slug", async () => {
     const app = createContentTestApp(
       createContentServiceMock({
-        providerName: "sanity",
+        providerName: "local",
         getPageBySlug: vi.fn().mockResolvedValue(null),
       })
     );
